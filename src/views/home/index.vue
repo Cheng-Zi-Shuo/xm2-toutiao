@@ -1,12 +1,13 @@
 <template>
   <el-container class="home-container">
     <el-aside class="my-aside" :width="collapse ? '64px' : '200px' ">
-        <div class="logo" :class="{ close:collapse }"></div>
+      <div class="logo" :class="{ close:collapse }"></div>
       <el-menu
+        router
         :collapse="collapse"
         :collapse-transition="false"
         style="border-right:none"
-        default-active="1"
+        :default-active="$route.path"
         background-color="#002033"
         text-color="#fff"
         active-text-color="#ffd04b"
@@ -46,26 +47,22 @@
         <el-header class="my-header">
           <span class="el-icon-s-fold" @click="toggleMenu()"></span>
           <span class="text">江苏传智播客科技教育有限公司</span>
-          <el-dropdown style="float:right">
+          <el-dropdown style="float:right" @command="handleCommand">
             <span class="el-dropdown-link">
-              <img
-                style="vertical-align:middle"
-                width="30"
-                height="30"
-                src="../../assets/images/avatar.jpg"
-                alt
-              />
-              <b style="vertical-align:middle;padding-left:5px">黑马小哥</b>
+              <img style="vertical-align:middle" width="30" height="30" :src="avatar" alt />
+              <b style="vertical-align:middle;padding-left:5px">{{name}}</b>
               <i class="el-icon-arrow-down el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item icon="el-icon-setting">个人设置</el-dropdown-item>
-              <el-dropdown-item icon="el-icon-unlock">退出登录</el-dropdown-item>
+              <el-dropdown-item icon="el-icon-setting" command="setting">个人设置</el-dropdown-item>
+              <el-dropdown-item icon="el-icon-unlock" command="logout">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </el-header>
       </el-header>
-      <el-main>Main</el-main>
+      <el-main>
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -74,12 +71,31 @@
 export default {
   data () {
     return {
-      collapse: false
+      collapse: false,
+      avatar: '',
+      name: ''
     }
+  },
+  created () {
+    const user = JSON.parse(window.sessionStorage.getItem('xm2-toutiao'))
+    this.avatar = user.photo
+    this.name = user.name
   },
   methods: {
     toggleMenu () {
       this.collapse = !this.collapse
+    },
+    setting () {
+      this.$router.push('./setting')
+    },
+    logout () {
+      // 清除sessionStorage中的 xm2-toutiao
+      window.sessionStorage.removeItem('xm2-toutiao')
+      this.$router.push('./login')
+    },
+    handleCommand (command) {
+      // command就是点击的选项中的command的值 setting/logout
+      this[command]()
     }
   }
 }
@@ -94,13 +110,14 @@ export default {
   .my-aside {
     background: #002033;
     .logo {
-        width: 100%;
-        height: 60px;
-        background: #024 url(../../assets/images/logo_admin.png) no-repeat center / 140px auto;
+      width: 100%;
+      height: 60px;
+      background: #024 url(../../assets/images/logo_admin.png) no-repeat center /
+        140px auto;
     }
     .close {
-        background-image: url(../../assets/images/logo_admin_01.png);
-        background-size: 36px auto;
+      background-image: url(../../assets/images/logo_admin_01.png);
+      background-size: 36px auto;
     }
   }
   .my-header {
